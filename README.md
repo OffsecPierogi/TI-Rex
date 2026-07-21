@@ -23,7 +23,12 @@ chmod +x install.sh
 ./install.sh
 ```
 
-The first user to register at `http://localhost:3000/register` becomes Admin.
+The install script will set up your `.env`, PostgreSQL (via Docker or existing), dependencies, and database schema. It then asks whether to ingest threat data:
+
+- **Fast mode (~2 min)** — ingests core data (MITRE ATT&CK, Atomic Red Team, CISA KEV, categories, detections, IOCs, YARA rules, Sigma rules, C2 profiles, threat feeds, and more). Skips slow rate-limited APIs (NVD CVSS enrichment, Malpedia actor enrichment, Supply Chain advisories). The built-in scheduler automatically backfills these on the first cycle after you start the app — no manual action needed.
+- **Full mode (10-15 min)** — ingests everything including NVD, Malpedia, and Supply Chain in one shot. Slower due to external API rate limits.
+
+After install, start the app with `npm run dev` (development) or `npm start` (production). The first user to register at `http://localhost:3000/register` becomes Admin. Data auto-refreshes every 6 hours by default (configurable in Settings).
 
 ## Important Notes
 
