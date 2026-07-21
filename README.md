@@ -17,8 +17,8 @@ Data ingestion runs automatically via a built-in scheduler (default 6 hours, con
 ## Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/threat-intel-dashboard.git
-cd threat-intel-dashboard
+git clone https://github.com/OffsecPierogi/TI-Rex.git
+cd TI-Rex
 chmod +x install.sh
 ./install.sh
 ```
