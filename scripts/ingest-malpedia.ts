@@ -98,12 +98,28 @@ function familyKeyToName(key: string): string {
   return slug.replace(/_/g, " ");
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const resp = await fetch(url, { signal: AbortSignal.timeout(30_000) });
-  if (!resp.ok) {
-    throw new Error(`HTTP ${resp.status} for ${url}`);
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function fetchJson<T>(url: string, retries = 3): Promise<T> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const resp = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+    if (resp.status === 429) {
+      if (attempt < retries) {
+        const wait = 30_000 * (attempt + 1);
+        console.warn(`  Rate limited (429), waiting ${wait / 1000}s before retry...`);
+        await sleep(wait);
+        continue;
+      }
+      throw new Error(`HTTP 429 for ${url} after ${retries} retries`);
+    }
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status} for ${url}`);
+    }
+    return resp.json() as Promise<T>;
   }
-  return resp.json() as Promise<T>;
+  throw new Error(`Failed to fetch ${url}`);
 }
 
 async function main() {
@@ -195,10 +211,9 @@ async function main() {
     totalActors = actorNames.length;
     console.log(`  Retrieved ${totalActors} Malpedia actors`);
 
-    // Cap at 200 actors to avoid hammering the API
-    const actorsToProcess = actorNames.slice(0, 200);
-    if (totalActors > 200) {
-      console.log(`  Processing first 200 of ${totalActors} actors (rate limit protection)`);
+    const actorsToProcess = actorNames.slice(0, 100);
+    if (totalActors > 100) {
+      console.log(`  Processing first 100 of ${totalActors} actors (rate limit protection)`);
     }
 
     // Load all threat actors into memory
@@ -263,8 +278,7 @@ async function main() {
         }
       }
 
-      // Rate limit: 500ms between actor detail requests
-      await new Promise((r) => setTimeout(r, 500));
+      await sleep(3000);
     }
 
     console.log(`  Enriched ${actorsEnriched} threat actors`);
