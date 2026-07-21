@@ -127,7 +127,7 @@ if [[ "$ingest" =~ ^[Yy]$ ]]; then
     npx tsx scripts/update-all.ts
   else
     info "Running fast install (skipping slow API enrichment)..."
-    npx tsx scripts/update-all.ts -- --fast
+    npx tsx scripts/update-all.ts --fast
   fi
   ok "Data ingestion complete"
 else
