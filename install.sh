@@ -107,16 +107,28 @@ ok "Database schema applied"
 # --- Data ingestion ---
 
 echo ""
-echo "  The next step downloads threat intel data from MITRE ATT&CK, NVD,"
+echo "  The next step downloads threat intel data from MITRE ATT&CK,"
 echo "  CISA KEV, abuse.ch, SigmaHQ, and other public sources."
-echo "  Takes 5-10 minutes. Requires internet."
+echo "  Fast mode takes ~2 minutes. Full mode takes 10-15 minutes."
 echo ""
 read -rp "$(echo -e "  ${YELLOW}Ingest threat data now? [Y/n]:${NC} ")" ingest
 ingest="${ingest:-Y}"
 
 if [[ "$ingest" =~ ^[Yy]$ ]]; then
-  info "Running full data pipeline (30 steps)..."
-  npx tsx scripts/update-all.ts
+  echo ""
+  echo "  1) Fast — core data only (~2 min), slow enrichment runs automatically later"
+  echo "  2) Full — everything including NVD/Malpedia (10-15 min)"
+  echo ""
+  read -rp "$(echo -e "  ${YELLOW}Choose [1/2]:${NC} ")" speed
+  speed="${speed:-1}"
+
+  if [[ "$speed" == "2" ]]; then
+    info "Running full data pipeline (31 steps)..."
+    npx tsx scripts/update-all.ts
+  else
+    info "Running fast install (skipping slow API enrichment)..."
+    npx tsx scripts/update-all.ts -- --fast
+  fi
   ok "Data ingestion complete"
 else
   info "Skipped. Run later with: npx tsx scripts/update-all.ts"

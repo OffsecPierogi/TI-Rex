@@ -3,6 +3,7 @@ import { ensureRepo } from "./utils/git-clone";
 import { execSync } from "child_process";
 import { join } from "path";
 
+const FAST_MODE = process.argv.includes("--fast");
 const SCRIPTS_DIR = __dirname;
 
 const REPOS = [
@@ -26,8 +27,32 @@ function runScript(name: string) {
   });
 }
 
+// Scripts that hit rate-limited external APIs and take minutes to complete.
+// Skipped in --fast mode (first install) — the scheduler backfills them automatically.
+const SLOW_SCRIPTS = new Set([
+  "ingest-malpedia.ts",
+  "ingest-nvd.ts",
+  "ingest-supply-chain.ts",
+]);
+
+function tryRun(name: string, label: string) {
+  if (FAST_MODE && SLOW_SCRIPTS.has(name)) {
+    console.log(`  Skipped (--fast) — will run on next scheduled update`);
+    return;
+  }
+  try {
+    runScript(name);
+  } catch {
+    console.log(`  ${label} skipped or failed`);
+  }
+}
+
 async function main() {
-  console.log("=== TI-Rex — Full Update ===\n");
+  console.log(`=== TI-Rex — ${FAST_MODE ? "Quick Install" : "Full Update"} ===\n`);
+  if (FAST_MODE) {
+    console.log("Fast mode: skipping slow API enrichment (Malpedia, NVD, Supply Chain).");
+    console.log("These will run automatically on the first scheduled update.\n");
+  }
   const start = Date.now();
 
   console.log("Step 1: Cloning / updating data repos...");
@@ -67,10 +92,10 @@ async function main() {
   runScript("auto-attribute-countries.ts");
 
   console.log("\nStep 11: OTX threat intel...");
-  try { runScript("ingest-otx.ts"); } catch { console.log("  OTX ingestion skipped or failed"); }
+  tryRun("ingest-otx.ts", "OTX ingestion");
 
   console.log("\nStep 12: Malpedia enrichment...");
-  try { runScript("ingest-malpedia.ts"); } catch { console.log("  Malpedia enrichment skipped or failed"); }
+  tryRun("ingest-malpedia.ts", "Malpedia enrichment");
 
   console.log("\nStep 13: Actor-malware relationships...");
   runScript("ingest-actor-malware.ts");
@@ -79,58 +104,61 @@ async function main() {
   runScript("classify-malware.ts");
 
   console.log("\nStep 15: C2 framework profiles...");
-  try { runScript("seed-c2-profiles.ts"); } catch { console.log("  C2 profiles skipped or failed"); }
+  tryRun("seed-c2-profiles.ts", "C2 profiles");
 
   console.log("\nStep 16: YARA rule library...");
-  try { runScript("seed-yara-rules.ts"); } catch { console.log("  YARA rules skipped or failed"); }
+  tryRun("seed-yara-rules.ts", "YARA rules");
 
   console.log("\nStep 17: Threat feeds...");
-  try { runScript("ingest-feeds.ts"); } catch { console.log("  Feed ingestion skipped or failed"); }
+  tryRun("ingest-feeds.ts", "Feed ingestion");
 
   console.log("\nStep 18: APT report collection (blackorbird)...");
-  try { runScript("ingest-apt-report.ts"); } catch { console.log("  APT report ingestion skipped or failed"); }
+  tryRun("ingest-apt-report.ts", "APT report ingestion");
 
   console.log("\nStep 19: ThreatFox IOC feed (abuse.ch)...");
-  try { runScript("ingest-threatfox.ts"); } catch { console.log("  ThreatFox ingestion skipped or failed"); }
+  tryRun("ingest-threatfox.ts", "ThreatFox ingestion");
 
   console.log("\nStep 20: Feodo Tracker C2 feed (abuse.ch)...");
-  try { runScript("ingest-feodo.ts"); } catch { console.log("  Feodo Tracker ingestion skipped or failed"); }
+  tryRun("ingest-feodo.ts", "Feodo Tracker ingestion");
 
   console.log("\nStep 21: URLhaus malicious URLs (abuse.ch)...");
-  try { runScript("ingest-urlhaus.ts"); } catch { console.log("  URLhaus ingestion skipped or failed"); }
+  tryRun("ingest-urlhaus.ts", "URLhaus ingestion");
 
   console.log("\nStep 22: SigmaHQ detection rules...");
-  try { runScript("ingest-sigma.ts"); } catch { console.log("  SigmaHQ ingestion skipped or failed"); }
+  tryRun("ingest-sigma.ts", "SigmaHQ ingestion");
 
   console.log("\nStep 23: RTFM offensive commands...");
-  try { runScript("ingest-rtfm.ts"); } catch { console.log("  RTFM ingestion skipped or failed"); }
+  tryRun("ingest-rtfm.ts", "RTFM ingestion");
 
   console.log("\nStep 24: YARA-Rules community rules...");
-  try { runScript("ingest-yara-rules.ts"); } catch { console.log("  YARA-Rules ingestion skipped or failed"); }
+  tryRun("ingest-yara-rules.ts", "YARA-Rules ingestion");
 
   console.log("\nStep 25: IOC retention pruning...");
-  try { runScript("prune-iocs.ts"); } catch { console.log("  IOC pruning skipped or failed"); }
+  tryRun("prune-iocs.ts", "IOC pruning");
 
   console.log("\nStep 26: EPSS score ingestion...");
-  try { runScript("ingest-epss.ts"); } catch { console.log("  EPSS ingestion skipped or failed"); }
+  tryRun("ingest-epss.ts", "EPSS ingestion");
 
   console.log("\nStep 27: NVD CVSS enrichment...");
-  try { runScript("ingest-nvd.ts"); } catch { console.log("  NVD enrichment skipped or failed"); }
+  tryRun("ingest-nvd.ts", "NVD enrichment");
 
   console.log("\nStep 28: Actor-CVE linking...");
-  try { runScript("link-actor-cves.ts"); } catch { console.log("  Actor-CVE linking skipped or failed"); }
+  tryRun("link-actor-cves.ts", "Actor-CVE linking");
 
   console.log("\nStep 29: Watchlist IOC matching...");
-  try { runScript("watchlist-match.ts"); } catch { console.log("  Watchlist matching skipped or failed"); }
+  tryRun("watchlist-match.ts", "Watchlist matching");
 
   console.log("\nStep 30: Supply chain advisory tracking...");
-  try { runScript("ingest-supply-chain.ts"); } catch { console.log("  Supply chain ingestion skipped or failed"); }
+  tryRun("ingest-supply-chain.ts", "Supply chain ingestion");
 
   console.log("\nStep 31: Pruning old NVD CVEs...");
-  try { runScript("prune-old-cves.ts"); } catch { console.log("  CVE pruning skipped or failed"); }
+  tryRun("prune-old-cves.ts", "CVE pruning");
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-  console.log(`\n=== Full update complete in ${elapsed}s ===`);
+  console.log(`\n=== ${FAST_MODE ? "Quick install" : "Full update"} complete in ${elapsed}s ===`);
+  if (FAST_MODE) {
+    console.log("Remaining enrichment (Malpedia, NVD, Supply Chain) will run on the first scheduled update.");
+  }
 }
 
 main().catch(console.error);
