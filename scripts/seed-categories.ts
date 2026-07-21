@@ -12,6 +12,7 @@ const CATEGORIES = [
   { slug: "c2-red-team", name: "C2 / Red Team", description: "Command & control frameworks and red team tooling: Cobalt Strike, Sliver, Havoc, Mythic, etc.", color: "#f97316" },
   { slug: "container-k8s", name: "Container / K8s", description: "Docker, Kubernetes, and container orchestration attacks: pod escape, kubelet abuse, image poisoning, service account exploitation.", color: "#0ea5e9" },
   { slug: "social-engineering", name: "Social Engineering", description: "Social engineering campaigns: phishing, vishing, smishing, BEC, pretexting, impersonation, MFA fatigue.", color: "#ec4899" },
+  { slug: "supply-chain", name: "Supply Chain", description: "Software supply chain attacks: compromised packages, dependency confusion, CI/CD poisoning, code signing abuse.", color: "#facc15" },
 ];
 
 async function main() {

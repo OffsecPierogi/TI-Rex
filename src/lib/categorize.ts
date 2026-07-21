@@ -211,6 +211,39 @@ const RULES: CategoryRule[] = [
       /callback.?phish/i, /voice.?phish/i, /deepfake/i, /AI.?generated/i,
     ],
   },
+  {
+    slug: "supply-chain",
+    techniquePatterns: [
+      /T1195/, /T1195\.001/, /T1195\.002/, /T1195\.003/,
+      /T1199/, /T1553/, /T1553\.002/, /T1553\.006/,
+      /T1608\.006/, /T1677/, /T1592\.002/,
+      /T1474/, /T1474\.002/, /T1474\.003/,
+    ],
+    platformPatterns: [],
+    actorPatterns: [
+      /lazarus/i, /hidden cobra/i, /labyrinth chollima/i,
+      /apt41/i, /barium/i, /wicked panda/i,
+      /apt29/i, /cozy bear/i, /midnight blizzard/i, /nobelium/i,
+      /sandworm/i, /iridium/i,
+      /diamond sleet/i, /zinc/i, /moonstone sleet/i,
+      /hafnium/i, /silk typhoon/i,
+      /mustang panda/i, /bronze president/i,
+      /ocean lotus/i, /apt32/i,
+      /scarleteel/i, /team tnt/i,
+    ],
+    descriptionPatterns: [
+      /supply.chain/i, /dependency.confusion/i, /typosquat/i,
+      /package.?hijack/i, /compromised.?package/i, /malicious.?package/i,
+      /npm.*(malware|malicious|backdoor)/i, /pypi.*(malware|malicious|backdoor)/i,
+      /package.?manager/i, /package.?registr/i,
+      /code.?signing/i, /build.?pipeline/i, /CI.?CD/i, /poisoned.?pipeline/i,
+      /software.?update.*compromise/i, /trojanized.?update/i,
+      /SolarWinds/i, /Codecov/i, /Kaseya/i, /3CX/i, /xz.?utils/i,
+      /event.?stream/i, /ua.?parser/i, /colors\.js/i, /faker\.js/i,
+      /compromised.?library/i, /upstream.?compromise/i,
+      /open.?source.*(poison|compromise|attack)/i,
+    ],
+  },
 ];
 
 function matchesAny(text: string, patterns: RegExp[]): boolean {

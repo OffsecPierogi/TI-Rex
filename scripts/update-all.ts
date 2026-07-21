@@ -123,7 +123,10 @@ async function main() {
   console.log("\nStep 29: Watchlist IOC matching...");
   try { runScript("watchlist-match.ts"); } catch { console.log("  Watchlist matching skipped or failed"); }
 
-  console.log("\nStep 30: Pruning old NVD CVEs...");
+  console.log("\nStep 30: Supply chain advisory tracking...");
+  try { runScript("ingest-supply-chain.ts"); } catch { console.log("  Supply chain ingestion skipped or failed"); }
+
+  console.log("\nStep 31: Pruning old NVD CVEs...");
   try { runScript("prune-old-cves.ts"); } catch { console.log("  CVE pruning skipped or failed"); }
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(1);

@@ -37,6 +37,7 @@ import {
   LogOut,
   User,
   Eye,
+  Package,
 } from "lucide-react";
 import { TIRexLogo } from "./TIRexLogo";
 import { logout } from "@/actions/auth";
@@ -76,6 +77,7 @@ const SECTIONS: NavSection[] = [
       { href: "/c2", label: "C2 Profiles", icon: Radio },
       { href: "/satcom", label: "SATCOM Intel", icon: Satellite },
       { href: "/cves", label: "CVEs / KEV", icon: ShieldAlert },
+      { href: "/supply-chain", label: "Supply Chain", icon: Package },
     ],
   },
   {
