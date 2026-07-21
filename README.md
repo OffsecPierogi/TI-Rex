@@ -10,8 +10,6 @@ Data ingestion runs automatically via a built-in scheduler (default 6 hours, con
 
 <img width="1251" height="517" alt="image" src="https://github.com/user-attachments/assets/0dba9d24-f0be-4a1b-abbf-2d1a4f32e847" />
 
-<img width="635" height="647" alt="image" src="https://github.com/user-attachments/assets/030ef362-8c48-4684-bc49-c9e43c43e8be" />
-
 <img width="1268" height="799" alt="image" src="https://github.com/user-attachments/assets/3c13e5c0-77fd-498a-9576-438d15cea257" />
 
 <img width="1245" height="565" alt="image" src="https://github.com/user-attachments/assets/c021821e-2567-49d5-8379-8c98d6233e30" />
