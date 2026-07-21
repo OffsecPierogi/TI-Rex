@@ -211,11 +211,6 @@ async function main() {
     totalActors = actorNames.length;
     console.log(`  Retrieved ${totalActors} Malpedia actors`);
 
-    const actorsToProcess = actorNames.slice(0, 100);
-    if (totalActors > 100) {
-      console.log(`  Processing first 100 of ${totalActors} actors (rate limit protection)`);
-    }
-
     // Load all threat actors into memory
     const allActors = await prisma.threatActor.findMany({
       select: { id: true, name: true, aliases: true, country: true, description: true },
@@ -231,6 +226,10 @@ async function main() {
       }
     }
 
+    // Only fetch details for actors that match our database
+    const actorsToProcess = actorNames.filter((n) => actorByName.has(n.toLowerCase()));
+    console.log(`  ${actorsToProcess.length} of ${totalActors} match our database — fetching only those`);
+
     for (const actorName of actorsToProcess) {
       try {
         const encodedName = encodeURIComponent(actorName);
@@ -238,47 +237,40 @@ async function main() {
           `${MALPEDIA_API}/get/actor/${encodedName}`
         );
 
-        // Try to match to our threat actors
-        const match = actorByName.get(actorName.toLowerCase());
+        const match = actorByName.get(actorName.toLowerCase())!;
+        const updates: Record<string, string> = {};
 
-        if (match) {
-          const updates: Record<string, string> = {};
-
-          // Set country if ours is missing
-          if (!match.country && detail.meta?.country) {
-            const isoCode = detail.meta.country.toUpperCase();
-            const fullCountry = ISO_TO_COUNTRY[isoCode];
-            if (fullCountry) {
-              updates.country = fullCountry;
-            }
-          }
-
-          // Update description if ours is empty
-          if (
-            (!match.description || match.description.trim() === "") &&
-            detail.description &&
-            detail.description.trim() !== ""
-          ) {
-            updates.description = detail.description;
-          }
-
-          if (Object.keys(updates).length > 0) {
-            await prisma.threatActor.update({
-              where: { id: match.id },
-              data: updates,
-            });
-            actorsEnriched++;
+        if (!match.country && detail.meta?.country) {
+          const isoCode = detail.meta.country.toUpperCase();
+          const fullCountry = ISO_TO_COUNTRY[isoCode];
+          if (fullCountry) {
+            updates.country = fullCountry;
           }
         }
+
+        if (
+          (!match.description || match.description.trim() === "") &&
+          detail.description &&
+          detail.description.trim() !== ""
+        ) {
+          updates.description = detail.description;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await prisma.threatActor.update({
+            where: { id: match.id },
+            data: updates,
+          });
+          actorsEnriched++;
+        }
       } catch (err) {
-        // 404 or other errors — skip this actor
         const msg = err instanceof Error ? err.message : String(err);
         if (!msg.includes("404")) {
           console.warn(`  Warning: Failed to fetch actor "${actorName}": ${msg}`);
         }
       }
 
-      await sleep(3000);
+      await sleep(1500);
     }
 
     console.log(`  Enriched ${actorsEnriched} threat actors`);
@@ -300,7 +292,7 @@ async function main() {
     console.log(`  Families fetched:       ${totalFamilies}`);
     console.log(`  Families matched:       ${familiesMatched}`);
     console.log(`  Descriptions updated:   ${descriptionsUpdated}`);
-    console.log(`  Actors processed:       ${actorsToProcess.length}`);
+    console.log(`  Actors processed:       ${actorsToProcess.length} (of ${totalActors} in Malpedia)`);
     console.log(`  Actors enriched:        ${actorsEnriched}`);
   } catch (err) {
     console.error("Malpedia enrichment failed:", err);
