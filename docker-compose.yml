@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tirex
+      POSTGRES_PASSWORD: tirex
+      POSTGRES_DB: tirex
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tirex"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://tirex:tirex@db:5432/tirex
+      AUTH_SECRET: ${AUTH_SECRET:-change-me-to-a-random-secret-at-least-32-chars}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

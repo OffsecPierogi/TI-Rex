@@ -1,0 +1,30 @@
+node_modules/
+.next/
+dev.db
+dev.db-journal
+src/generated/
+data/sources/
+data/update.log
+
+# Environment files with secrets — use .env.example as template
+.env
+.env.local
+.env.production
+.env*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build
+tsconfig.tsbuildinfo
+
+# Claude Code
+AGENTS.md
+CLAUDE.md

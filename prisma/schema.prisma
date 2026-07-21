@@ -1,0 +1,564 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  READER
+  EDITOR
+  ADMIN
+}
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String?
+  hashedPassword String
+  role           Role     @default(READER)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  sessions   Session[]
+  watchlists Watchlist[]
+
+  @@index([email])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+model Tactic {
+  id          String   @id @default(cuid())
+  stixId      String   @unique
+  externalId  String   @unique
+  name        String
+  shortName   String
+  description String
+  url         String
+  matrix      String
+  orderIndex  Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  techniques TacticTechnique[]
+
+  @@index([matrix])
+}
+
+model Technique {
+  id              String   @id @default(cuid())
+  stixId          String   @unique
+  externalId      String   @unique
+  name            String
+  description     String
+  url             String
+  platforms       String
+  dataSources     String?
+  detection       String?
+  isSubtechnique  Boolean  @default(false)
+  parentId        String?
+  matrix          String
+  deprecated      Boolean  @default(false)
+  revoked         Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  parent   Technique?  @relation("SubTechniques", fields: [parentId], references: [id])
+  children Technique[] @relation("SubTechniques")
+
+  tactics      TacticTechnique[]
+  procedures   Procedure[]
+  atomicTests  AtomicTest[]
+  categories   CategoryTechnique[]
+  detections   DetectionRule[]
+  malwareUses  MalwareTechnique[]
+  toolUses     ToolTechnique[]
+  yaraRules    YaraRule[]
+  offensiveCommands OffensiveCommand[]
+
+  @@index([externalId])
+  @@index([parentId])
+  @@index([matrix])
+}
+
+model TacticTechnique {
+  tacticId    String
+  techniqueId String
+
+  tactic    Tactic    @relation(fields: [tacticId], references: [id])
+  technique Technique @relation(fields: [techniqueId], references: [id])
+
+  @@id([tacticId, techniqueId])
+}
+
+model ThreatActor {
+  id          String   @id @default(cuid())
+  stixId      String   @unique
+  externalId  String   @unique
+  name        String
+  aliases     String?
+  description String
+  country     String?
+  motivations String?
+  url         String
+  matrix      String
+  deprecated  Boolean  @default(false)
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  procedures    Procedure[]
+  campaigns     CampaignActor[]
+  categories    CategoryActor[]
+  malwareLinks  ActorMalware[]
+  feedItems     ActorFeedItem[]
+  advisories    ActorAdvisory[]
+
+  @@index([name])
+}
+
+model Procedure {
+  id          String   @id @default(cuid())
+  stixId      String   @unique
+  actorId     String?
+  campaignId  String?
+  malwareId   String?
+  toolId      String?
+  techniqueId String
+  description String
+  createdAt   DateTime @default(now())
+
+  actor     ThreatActor? @relation(fields: [actorId], references: [id])
+  campaign  Campaign?    @relation(fields: [campaignId], references: [id])
+  malware   Malware?     @relation(fields: [malwareId], references: [id])
+  tool      Tool?        @relation(fields: [toolId], references: [id])
+  technique Technique    @relation(fields: [techniqueId], references: [id])
+
+  @@index([actorId])
+  @@index([techniqueId])
+  @@index([malwareId])
+  @@index([toolId])
+}
+
+model AtomicTest {
+  id                String   @id @default(cuid())
+  guid              String   @unique
+  techniqueId       String
+  name              String
+  description       String
+  platforms         String
+  executor          String
+  command           String
+  cleanupCommand    String?
+  inputArguments    String?
+  elevationRequired Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  technique Technique @relation(fields: [techniqueId], references: [id])
+
+  @@index([techniqueId])
+  @@index([executor])
+}
+
+model Campaign {
+  id          String    @id @default(cuid())
+  stixId      String    @unique
+  externalId  String    @unique
+  name        String
+  description String
+  firstSeen   DateTime?
+  lastSeen    DateTime?
+  url         String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  actors     CampaignActor[]
+  procedures Procedure[]
+}
+
+model CampaignActor {
+  campaignId String
+  actorId    String
+
+  campaign Campaign    @relation(fields: [campaignId], references: [id])
+  actor    ThreatActor @relation(fields: [actorId], references: [id])
+
+  @@id([campaignId, actorId])
+}
+
+model Malware {
+  id          String   @id @default(cuid())
+  stixId      String   @unique
+  externalId  String   @unique
+  name        String
+  aliases     String?
+  description String
+  type        String?
+  platforms   String?
+  url         String
+  deprecated  Boolean  @default(false)
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  procedures  Procedure[]
+  techniques  MalwareTechnique[]
+  actorLinks  ActorMalware[]
+  yaraRules   YaraRule[]
+}
+
+model MalwareTechnique {
+  malwareId   String
+  techniqueId String
+
+  malware   Malware   @relation(fields: [malwareId], references: [id])
+  technique Technique @relation(fields: [techniqueId], references: [id])
+
+  @@id([malwareId, techniqueId])
+}
+
+model Tool {
+  id          String   @id @default(cuid())
+  stixId      String   @unique
+  externalId  String   @unique
+  name        String
+  aliases     String?
+  description String
+  platforms   String?
+  url         String
+  deprecated  Boolean  @default(false)
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  procedures Procedure[]
+  techniques ToolTechnique[]
+}
+
+model ToolTechnique {
+  toolId      String
+  techniqueId String
+
+  tool      Tool      @relation(fields: [toolId], references: [id])
+  technique Technique @relation(fields: [techniqueId], references: [id])
+
+  @@id([toolId, techniqueId])
+}
+
+model ActorMalware {
+  actorId   String
+  malwareId String
+
+  actor   ThreatActor @relation(fields: [actorId], references: [id])
+  malware Malware     @relation(fields: [malwareId], references: [id])
+
+  @@id([actorId, malwareId])
+  @@index([malwareId])
+}
+
+model ActorAdvisory {
+  actorId    String
+  advisoryId String
+
+  actor    ThreatActor @relation(fields: [actorId], references: [id])
+  advisory Advisory    @relation(fields: [advisoryId], references: [id])
+
+  @@id([actorId, advisoryId])
+  @@index([advisoryId])
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  description String?
+  color       String?
+  createdAt   DateTime @default(now())
+
+  techniques CategoryTechnique[]
+  actors     CategoryActor[]
+}
+
+model CategoryTechnique {
+  categoryId       String
+  techniqueId      String
+  isManualOverride Boolean @default(false)
+
+  category  Category  @relation(fields: [categoryId], references: [id])
+  technique Technique @relation(fields: [techniqueId], references: [id])
+
+  @@id([categoryId, techniqueId])
+}
+
+model CategoryActor {
+  categoryId       String
+  actorId          String
+  isManualOverride Boolean @default(false)
+
+  category Category    @relation(fields: [categoryId], references: [id])
+  actor    ThreatActor @relation(fields: [actorId], references: [id])
+
+  @@id([categoryId, actorId])
+}
+
+model Advisory {
+  id               String    @id @default(cuid())
+  advisoryId       String    @unique
+  title            String
+  description      String
+  type             String
+  severity         String?
+  cveId            String?
+  vendorProject    String?
+  product          String?
+  dateAdded        DateTime?
+  dueDate          DateTime?
+  knownRansomware  Boolean   @default(false)
+  url              String?
+  rawJson          String?
+  epssScore        Float?
+  epssPercentile   Float?
+  cvssScore        Float?
+  cvssVector       String?
+  publishedDate    DateTime?
+  lastModifiedDate DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  iocs   IOC[]
+  actors ActorAdvisory[]
+
+  @@index([type])
+  @@index([cveId])
+  @@index([epssScore])
+}
+
+model IOC {
+  id          String    @id @default(cuid())
+  type        String
+  value       String
+  source      String
+  advisoryId  String?
+  description String?
+  firstSeen   DateTime?
+  lastSeen    DateTime?
+  createdAt   DateTime  @default(now())
+
+  advisory Advisory? @relation(fields: [advisoryId], references: [id])
+  analyses SandboxAnalysis[]
+
+  @@index([type, value])
+  @@index([advisoryId])
+}
+
+model DetectionRule {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  query       String
+  language    String
+  techniqueId String?
+  category    String?
+  source      String?
+  severity    String?
+  tags        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  technique Technique? @relation(fields: [techniqueId], references: [id])
+
+  @@index([language])
+  @@index([techniqueId])
+  @@index([category])
+}
+
+model SandboxAnalysis {
+  id              String   @id @default(cuid())
+  indicator       String
+  indicatorType   String
+  source          String
+  malicious       Int      @default(0)
+  suspicious      Int      @default(0)
+  harmless        Int      @default(0)
+  undetected      Int      @default(0)
+  score           Int      @default(0)
+  verdict         String?
+  malwareFamily   String?
+  tags            String?
+  fileType        String?
+  fileSize        Int?
+  fileName        String?
+  sha256          String?
+  md5             String?
+  sha1            String?
+  ssdeep          String?
+  firstSeen       DateTime?
+  lastSeen        DateTime?
+  techniques      String?
+  rawJson         String?
+  iocId           String?
+  fetchedAt       DateTime @default(now())
+
+  ioc IOC? @relation(fields: [iocId], references: [id])
+
+  @@unique([indicator, source])
+  @@index([indicator])
+  @@index([iocId])
+}
+
+model UpdateLog {
+  id               String    @id @default(cuid())
+  source           String
+  status           String
+  recordsProcessed Int       @default(0)
+  recordsCreated   Int       @default(0)
+  recordsUpdated   Int       @default(0)
+  errorMessage     String?
+  startedAt        DateTime  @default(now())
+  completedAt      DateTime?
+
+  @@index([source, startedAt])
+}
+
+model YaraRule {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  rule        String
+  category    String?
+  author      String?
+  reference   String?
+  tags        String?
+  malwareId   String?
+  techniqueId String?
+  severity    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  malware   Malware?   @relation(fields: [malwareId], references: [id])
+  technique Technique? @relation(fields: [techniqueId], references: [id])
+
+  @@index([category])
+  @@index([malwareId])
+  @@index([techniqueId])
+}
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model Watchlist {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  webhookUrl  String?
+  userId      String
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items  WatchlistItem[]
+  alerts WatchlistAlert[]
+
+  @@index([userId])
+}
+
+model WatchlistItem {
+  id          String   @id @default(cuid())
+  watchlistId String
+  type        String
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+
+  watchlist Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+  alerts    WatchlistAlert[]
+
+  @@unique([watchlistId, type, value])
+  @@index([type, value])
+}
+
+model WatchlistAlert {
+  id          String   @id @default(cuid())
+  watchlistId String
+  itemId      String
+  matchSource String
+  matchDetail String?
+  iocId       String?
+  read        Boolean  @default(false)
+  notifiedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  watchlist Watchlist      @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+  item      WatchlistItem  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([watchlistId, read])
+  @@index([createdAt])
+}
+
+model FeedItem {
+  id          String    @id @default(cuid())
+  title       String
+  url         String    @unique
+  source      String
+  author      String?
+  summary     String?
+  content     String?
+  imageUrl    String?
+  publishedAt DateTime?
+  fetchedAt   DateTime  @default(now())
+  tags        String?
+
+  actors ActorFeedItem[]
+
+  @@index([source, publishedAt])
+  @@index([publishedAt])
+}
+
+model ActorFeedItem {
+  actorId    String
+  feedItemId String
+
+  actor    ThreatActor @relation(fields: [actorId], references: [id])
+  feedItem FeedItem    @relation(fields: [feedItemId], references: [id])
+
+  @@id([actorId, feedItemId])
+  @@index([feedItemId])
+}
+
+model OffensiveCommand {
+  id          String    @id @default(cuid())
+  command     String
+  description String?
+  author      String?
+  source      String
+  tags        String?
+  references  String?
+  platform    String?
+  techniqueId String?
+  createdAt   DateTime  @default(now())
+
+  technique Technique? @relation(fields: [techniqueId], references: [id])
+
+  @@unique([command, source])
+  @@index([source])
+  @@index([platform])
+}
