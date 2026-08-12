@@ -1,0 +1,14 @@
+# TI-Rex — System Requirements
+#
+# These are system-level prerequisites, not npm packages.
+# npm dependencies are handled automatically by `npm install` (see package.json).
+
+# Required
+Node.js >= 18          # https://nodejs.org
+npm                    # ships with Node.js
+Git                    # https://git-scm.com
+PostgreSQL >= 14       # or use Docker (install.sh can set this up)
+
+# Optional
+Docker                 # only if you want install.sh to manage Postgres for you
+OpenSSL                # used to generate AUTH_SECRET; script has a fallback if missing

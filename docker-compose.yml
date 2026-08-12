@@ -20,7 +20,7 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     environment:
       DATABASE_URL: postgresql://tirex:tirex@db:5432/tirex
       AUTH_SECRET: ${AUTH_SECRET:-change-me-to-a-random-secret-at-least-32-chars}

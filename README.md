@@ -14,6 +14,17 @@ Data ingestion runs automatically via a built-in scheduler (default 6 hours, con
 
 <img width="1245" height="565" alt="image" src="https://github.com/user-attachments/assets/c021821e-2567-49d5-8379-8c98d6233e30" />
 
+## Prerequisites
+
+| Requirement | Version | Check | Install |
+|------------|---------|-------|---------|
+| **Node.js** | 18+ | `node -v` | [nodejs.org](https://nodejs.org) |
+| **npm** | (ships with Node) | `npm -v` | Included with Node.js |
+| **Git** | any | `git --version` | [git-scm.com](https://git-scm.com) |
+| **PostgreSQL** | 14+ | `psql --version` | The install script can spin one up via Docker, or use your own |
+| **Docker** (optional) | any | `docker --version` | Only needed if you want the install script to manage Postgres for you |
+| **OpenSSL** (optional) | any | `openssl version` | Used to generate AUTH_SECRET; the script has a fallback if missing |
+
 ## Install
 
 ```bash
@@ -21,6 +32,36 @@ git clone https://github.com/OffsecPierogi/TI-Rex.git
 cd TI-Rex
 chmod +x install.sh
 ./install.sh
+```
+
+### Manual Install (Without install.sh)
+
+If the install script doesn't work on your system:
+
+```bash
+git clone https://github.com/OffsecPierogi/TI-Rex.git
+cd TI-Rex
+
+# 1. Create .env from example
+cp .env.example .env
+
+# 2. Generate AUTH_SECRET and paste it into .env
+openssl rand -hex 32
+
+# 3. Set DATABASE_URL in .env to your Postgres connection string
+
+# 4. Install dependencies
+npm install
+
+# 5. Set up database
+npx prisma generate
+npx prisma db push
+
+# 6. Ingest threat data (fast mode)
+npx tsx scripts/update-all.ts --fast
+
+# 7. Start
+npm run dev
 ```
 
 The install script will set up your `.env`, PostgreSQL (via Docker or existing), dependencies, and database schema. It then asks whether to ingest threat data:

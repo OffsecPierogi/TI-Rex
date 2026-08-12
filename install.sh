@@ -44,8 +44,12 @@ else
 fi
 
 if grep -q 'AUTH_SECRET=""' .env 2>/dev/null; then
-  SECRET=$(openssl rand -base64 32 2>/dev/null || head -c 32 /dev/urandom | base64)
-  sed -i "s|AUTH_SECRET=\"\"|AUTH_SECRET=\"${SECRET}\"|" .env
+  SECRET=$(openssl rand -hex 32 2>/dev/null || head -c 32 /dev/urandom | xxd -p | tr -d '\n')
+  if [[ "$OSTYPE" == darwin* ]]; then
+    sed -i '' "s|AUTH_SECRET=\"\"|AUTH_SECRET=\"${SECRET}\"|" .env
+  else
+    sed -i "s|AUTH_SECRET=\"\"|AUTH_SECRET=\"${SECRET}\"|" .env
+  fi
   ok "Generated AUTH_SECRET (required for login/registration)"
 fi
 
