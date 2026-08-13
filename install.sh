@@ -101,6 +101,11 @@ info "Installing dependencies..."
 npm install --loglevel=warn
 ok "Dependencies installed"
 
+# --- Supply chain audit ---
+
+info "Running supply chain audit..."
+bash scripts/audit-supply-chain.sh
+
 # --- Database ---
 
 info "Setting up database..."
