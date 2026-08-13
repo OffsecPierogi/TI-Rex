@@ -6,7 +6,7 @@ The platform ships with 30+ modules including a CVE tracker with EPSS exploit pr
 
 Data ingestion runs automatically via a built-in scheduler (default 6 hours, configurable from the settings page) that clones repos, fetches APIs, scores CVEs, matches watchlist IOCs, and prunes stale records — no cron jobs or external setup required. The 30-step pipeline can also be triggered manually from the UI, via API (`POST /api/update`), or from the CLI with `npx tsx scripts/update-all.ts`. API keys for VirusTotal, OTX, AbuseIPDB, Shodan, Hybrid Analysis, and NVD are optional but unlock additional enrichment and faster ingestion. See `.env.example` for all configuration options.
 
-<img width="1694" height="773" alt="image" src="https://github.com/user-attachments/assets/8a8490ea-7531-423c-907f-f238b4b1607f" />
+<img width="1607" height="830" alt="image" src="https://github.com/user-attachments/assets/6a40a151-75bf-4e95-afb2-91e0caf9a295" />
 
 <img width="1251" height="517" alt="image" src="https://github.com/user-attachments/assets/0dba9d24-f0be-4a1b-abbf-2d1a4f32e847" />
 
