@@ -26,6 +26,7 @@ Data ingestion runs automatically via a built-in scheduler (default 6 hours, con
 | **OpenSSL** (optional) | any | `openssl version` | Used to generate AUTH_SECRET; the script has a fallback if missing |
 
 ## Install
+NOTE: This has been successfully tested on Ubuntu & MacOS.
 
 ```bash
 git clone https://github.com/OffsecPierogi/TI-Rex.git
