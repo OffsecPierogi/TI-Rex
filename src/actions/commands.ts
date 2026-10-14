@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { safeParseArray } from "@/lib/parse";
 
 export async function getCommands(opts: {
   page?: number;
@@ -58,7 +59,7 @@ export async function getCommands(opts: {
   return {
     tests: tests.map((t) => ({
       ...t,
-      platforms: JSON.parse(t.platforms) as string[],
+      platforms: safeParseArray(t.platforms),
       categories: t.technique.categories.map((c) => c.category),
     })),
     total,
@@ -94,7 +95,7 @@ export async function getCommandDetail(id: string) {
 
   return {
     ...test,
-    platforms: JSON.parse(test.platforms) as string[],
+    platforms: safeParseArray(test.platforms),
     inputArguments: test.inputArguments ? JSON.parse(test.inputArguments) : null,
   };
 }

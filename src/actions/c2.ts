@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { safeParseArray } from "@/lib/parse";
 
 export interface C2Meta {
   c2: boolean;
@@ -69,9 +70,7 @@ export async function getC2Profiles(opts: {
       const meta = parseC2Meta(tool.aliases);
       if (!meta) return null;
 
-      const platforms = tool.platforms
-        ? (JSON.parse(tool.platforms) as string[])
-        : [];
+      const platforms = safeParseArray(tool.platforms);
 
       const item: C2ListItem = {
         id: tool.id,
@@ -176,9 +175,7 @@ export async function getC2Detail(id: string) {
   const meta = parseC2Meta(tool.aliases);
   if (!meta) return null;
 
-  const platforms = tool.platforms
-    ? (JSON.parse(tool.platforms) as string[])
-    : [];
+  const platforms = safeParseArray(tool.platforms);
 
   // Group techniques by tactic
   const tacticMap = new Map<

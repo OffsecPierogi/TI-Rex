@@ -1,4 +1,5 @@
 import { getActorDetail } from "@/actions/actors";
+import { safeParseArray } from "@/lib/parse";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { NavigatorExportButton } from "@/components/NavigatorExport";
@@ -248,7 +249,7 @@ export default async function ActorDetailPage(props: { params: Promise<{ id: str
                 </div>
                 <pre className="code-block">{test.command}</pre>
                 <div className="flex gap-1.5 mt-2">
-                  {(JSON.parse(test.platforms) as string[]).map((p) => (
+                  {safeParseArray(test.platforms).map((p) => (
                     <span key={p} className="badge bg-zinc-800 text-zinc-400">{p}</span>
                   ))}
                 </div>

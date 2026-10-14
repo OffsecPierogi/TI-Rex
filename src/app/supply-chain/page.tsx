@@ -1,4 +1,5 @@
 import { getSupplyChainAlerts, getSupplyChainStats } from "@/actions/supply-chain";
+import { safeParseArray } from "@/lib/parse";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 
@@ -124,7 +125,7 @@ export default async function SupplyChainPage(props: {
 
       <div className="space-y-2">
         {items.map((item) => {
-          const aliases: string[] = item.aliases ? JSON.parse(item.aliases) : [];
+          const aliases: string[] = safeParseArray(item.aliases);
           return (
             <div key={item.id} className="card">
               <div className="flex items-start justify-between gap-4">

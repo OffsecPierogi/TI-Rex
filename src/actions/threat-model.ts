@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { safeParseArray } from "@/lib/parse";
 import { STACK_COMPONENTS, INDUSTRY_PROFILES, type StackComponent } from "@/lib/threat-model-data";
 
 export async function getStackAnalysis(componentIds: string[]) {
@@ -63,7 +64,7 @@ export async function getStackAnalysis(componentIds: string[]) {
       id: t.id,
       externalId: t.externalId,
       name: t.name,
-      platforms: JSON.parse(t.platforms) as string[],
+      platforms: safeParseArray(t.platforms),
       tactics: t.tactics.map((tt) => tt.tactic.name),
       atomicTests: t._count.atomicTests,
       detections: t._count.detections,

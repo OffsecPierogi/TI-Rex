@@ -1,4 +1,5 @@
 import { getToolDetail } from "@/actions/tools";
+import { safeParseArray } from "@/lib/parse";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -174,7 +175,7 @@ export default async function ToolDetailPage(props: {
                 </div>
                 <pre className="code-block">{test.command}</pre>
                 <div className="flex gap-1.5 mt-2">
-                  {(JSON.parse(test.platforms) as string[]).map((p) => (
+                  {safeParseArray(test.platforms).map((p) => (
                     <span
                       key={p}
                       className="badge bg-zinc-800 text-zinc-400"

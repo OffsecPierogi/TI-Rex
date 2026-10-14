@@ -1,5 +1,6 @@
 "use server";
 import { prisma } from "@/lib/db";
+import { safeParseArray } from "@/lib/parse";
 
 type CoverageStatus = "covered" | "gap" | "detection-only";
 
@@ -176,8 +177,8 @@ export async function getPurpleTeamDetail(techniqueId: string) {
 
   return {
     ...technique,
-    platforms: JSON.parse(technique.platforms) as string[],
-    dataSources: technique.dataSources ? (JSON.parse(technique.dataSources) as string[]) : [],
+    platforms: safeParseArray(technique.platforms),
+    dataSources: safeParseArray(technique.dataSources),
     status,
     suggestedActions,
   };

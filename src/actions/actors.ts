@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { safeParseArray } from "@/lib/parse";
 
 export async function getActors(opts: {
   page?: number;
@@ -46,9 +47,9 @@ export async function getActors(opts: {
       id: a.id,
       name: a.name,
       externalId: a.externalId,
-      aliases: a.aliases ? (JSON.parse(a.aliases) as string[]) : [],
+      aliases: safeParseArray(a.aliases),
       country: a.country,
-      motivations: a.motivations ? (JSON.parse(a.motivations) as string[]) : [],
+      motivations: safeParseArray(a.motivations),
       matrix: a.matrix,
       procedureCount: a._count.procedures,
       campaignCount: a._count.campaigns,
@@ -155,8 +156,8 @@ export async function getActorDetail(id: string) {
 
   return {
     ...actor,
-    aliases: actor.aliases ? (JSON.parse(actor.aliases) as string[]) : [],
-    motivations: actor.motivations ? (JSON.parse(actor.motivations) as string[]) : [],
+    aliases: safeParseArray(actor.aliases),
+    motivations: safeParseArray(actor.motivations),
     atomicTests,
     aptReports,
     exploitedCves,

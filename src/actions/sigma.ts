@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { safeParseArray } from "@/lib/parse";
 import { generateSigmaRule, sigmaToYaml } from "@/lib/sigma-generator";
 
 function testToSigmaInput(t: {
@@ -70,7 +71,7 @@ export async function getAtomicTestsForSigma(opts: {
     const yaml = sigmaToYaml(rule);
     return {
       ...t,
-      platforms: JSON.parse(t.platforms) as string[],
+      platforms: safeParseArray(t.platforms),
       sigmaRule: rule,
       sigmaYaml: yaml,
     };
@@ -104,7 +105,7 @@ export async function generateSigmaForTest(testId: string) {
 
   return {
     ...t,
-    platforms: JSON.parse(t.platforms) as string[],
+    platforms: safeParseArray(t.platforms),
     sigmaRule: rule,
     sigmaYaml: yaml,
   };

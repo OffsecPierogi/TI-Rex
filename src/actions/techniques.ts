@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { safeParseArray } from "@/lib/parse";
 
 export async function getTechniques(opts: {
   page?: number;
@@ -48,7 +49,7 @@ export async function getTechniques(opts: {
       isSubtechnique: t.isSubtechnique,
       parentName: t.parent?.name ?? null,
       parentExtId: t.parent?.externalId ?? null,
-      platforms: JSON.parse(t.platforms) as string[],
+      platforms: safeParseArray(t.platforms),
       matrix: t.matrix,
       procedureCount: t._count.procedures,
       atomicTestCount: t._count.atomicTests,
@@ -94,7 +95,7 @@ export async function getTechniqueDetail(id: string) {
 
   return {
     ...technique,
-    platforms: JSON.parse(technique.platforms) as string[],
-    dataSources: technique.dataSources ? (JSON.parse(technique.dataSources) as string[]) : [],
+    platforms: safeParseArray(technique.platforms),
+    dataSources: safeParseArray(technique.dataSources),
   };
 }

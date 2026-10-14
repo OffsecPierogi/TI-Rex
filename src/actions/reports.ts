@@ -1,5 +1,6 @@
 "use server";
 import { prisma } from "@/lib/db";
+import { safeParseArray } from "@/lib/parse";
 
 export type ReportType = "actor" | "malware" | "technique" | "category";
 
@@ -109,8 +110,8 @@ export async function generateActorReport(actorId: string) {
       : [],
   ]);
 
-  const aliases = actor.aliases ? (JSON.parse(actor.aliases) as string[]) : [];
-  const motivations = actor.motivations ? (JSON.parse(actor.motivations) as string[]) : [];
+  const aliases = safeParseArray(actor.aliases);
+  const motivations = safeParseArray(actor.motivations);
   const tacticsUsed = [...new Set(techniques.flatMap((t) => t.tactics))];
 
   const executiveSummary = buildActorExecutiveSummary({
@@ -156,7 +157,7 @@ export async function generateActorReport(actorId: string) {
     })),
     atomicTests: atomicTests.map((t) => ({
       ...t,
-      platforms: JSON.parse(t.platforms) as string[],
+      platforms: safeParseArray(t.platforms),
     })),
     detectionRules,
     coverage: {
@@ -262,7 +263,7 @@ export async function generateMalwareReport(malwareId: string) {
     }),
   ]);
 
-  const aliases = malware.aliases ? (JSON.parse(malware.aliases) as string[]) : [];
+  const aliases = safeParseArray(malware.aliases);
   const tacticsUsed = [...new Set(techniques.flatMap((t) => t.tactics))];
   const actorCountries = malware.actorLinks.map((l) => l.actor.country).filter(Boolean);
 
@@ -293,14 +294,14 @@ export async function generateMalwareReport(malwareId: string) {
       aliases,
       description: malware.description,
       type: malware.type,
-      platforms: malware.platforms ? (JSON.parse(malware.platforms) as string[]) : [],
+      platforms: safeParseArray(malware.platforms),
       url: malware.url,
     },
     techniques,
     actors: malware.actorLinks.map((l) => l.actor),
     atomicTests: atomicTests.map((t) => ({
       ...t,
-      platforms: JSON.parse(t.platforms) as string[],
+      platforms: safeParseArray(t.platforms),
     })),
     detectionRules,
     coverage: {
@@ -349,8 +350,8 @@ export async function generateTechniqueReport(techniqueId: string) {
       externalId: technique.externalId,
       name: technique.name,
       description: technique.description,
-      platforms: JSON.parse(technique.platforms) as string[],
-      dataSources: technique.dataSources ? (JSON.parse(technique.dataSources) as string[]) : [],
+      platforms: safeParseArray(technique.platforms),
+      dataSources: safeParseArray(technique.dataSources),
       detection: technique.detection,
       isSubtechnique: technique.isSubtechnique,
       url: technique.url,
@@ -362,7 +363,7 @@ export async function generateTechniqueReport(techniqueId: string) {
     procedures: technique.procedures,
     atomicTests: technique.atomicTests.map((t) => ({
       ...t,
-      platforms: JSON.parse(t.platforms) as string[],
+      platforms: safeParseArray(t.platforms),
     })),
     detectionRules: technique.detections,
     coverage: {

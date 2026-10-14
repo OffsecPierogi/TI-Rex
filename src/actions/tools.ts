@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { safeParseArray } from "@/lib/parse";
 
 export async function getTools(opts: { page?: number; search?: string }) {
   const page = opts.page ?? 1;
@@ -34,8 +35,8 @@ export async function getTools(opts: { page?: number; search?: string }) {
       id: t.id,
       name: t.name,
       externalId: t.externalId,
-      aliases: (() => { try { const p = t.aliases ? JSON.parse(t.aliases) : null; return Array.isArray(p) ? p : []; } catch { return []; } })(),
-      platforms: t.platforms ? (JSON.parse(t.platforms) as string[]) : [],
+      aliases: safeParseArray(t.aliases),
+      platforms: safeParseArray(t.platforms),
       description: t.description,
       url: t.url,
       procedureCount: t._count.procedures,
@@ -88,8 +89,8 @@ export async function getToolDetail(id: string) {
 
   return {
     ...tool,
-    aliases: (() => { try { const p = tool.aliases ? JSON.parse(tool.aliases) : null; return Array.isArray(p) ? p : []; } catch { return []; } })(),
-    platforms: tool.platforms ? (JSON.parse(tool.platforms) as string[]) : [],
+    aliases: safeParseArray(tool.aliases),
+    platforms: safeParseArray(tool.platforms),
     atomicTests,
   };
 }
