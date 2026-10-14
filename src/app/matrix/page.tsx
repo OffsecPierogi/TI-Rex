@@ -12,13 +12,13 @@ export default async function MatrixPage(props: {
     <div className="max-w-full mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">MITRE ATT&CK Matrix</h1>
+          <h1 className="text-2xl font-bold">{matrixName === "atlas" ? "MITRE ATLAS Matrix" : "MITRE ATT&CK Matrix"}</h1>
           <p className="text-sm text-[var(--text-secondary)]">
             {tactics.reduce((sum, t) => sum + t.techniques.length, 0)} techniques across {tactics.length} tactics
           </p>
         </div>
         <div className="flex gap-2">
-          {["enterprise-attack", "mobile-attack", "ics-attack"].map((m) => (
+          {["enterprise-attack", "mobile-attack", "ics-attack", "atlas"].map((m) => (
             <Link
               key={m}
               href={`/matrix?matrix=${m}`}
@@ -26,7 +26,7 @@ export default async function MatrixPage(props: {
                 matrixName === m ? "bg-[var(--accent)] text-white" : "bg-[var(--bg-tertiary)] text-[var(--text-secondary)]"
               }`}
             >
-              {m.replace("-attack", "").toUpperCase()}
+              {m === "atlas" ? "ATLAS" : m.replace("-attack", "").toUpperCase()}
             </Link>
           ))}
         </div>

@@ -67,6 +67,9 @@ async function main() {
   console.log("\nStep 2: MITRE ATT&CK ingestion...");
   runScript("ingest-mitre.ts");
 
+  console.log("\nStep 2b: MITRE ATLAS (AI/ML threats) ingestion...");
+  tryRun("ingest-atlas.ts", "ATLAS ingestion");
+
   console.log("\nStep 3: Atomic Red Team ingestion...");
   runScript("ingest-atomic.ts");
 

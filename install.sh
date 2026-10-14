@@ -116,7 +116,7 @@ ok "Database schema applied"
 # --- Data ingestion ---
 
 echo ""
-echo "  The next step downloads threat intel data from MITRE ATT&CK,"
+echo "  The next step downloads threat intel data from MITRE ATT&CK, MITRE ATLAS,"
 echo "  CISA KEV, abuse.ch, SigmaHQ, and other public sources."
 echo "  Fast mode takes ~2 minutes. Full mode takes 10-15 minutes."
 echo ""

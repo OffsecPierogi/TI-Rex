@@ -29,6 +29,7 @@ export default async function TechniquesPage(props: {
           <option value="enterprise-attack">Enterprise</option>
           <option value="mobile-attack">Mobile</option>
           <option value="ics-attack">ICS</option>
+          <option value="atlas">ATLAS (AI/ML)</option>
         </select>
         <button type="submit" className="px-4 py-2 bg-[var(--accent)] text-white rounded-lg text-sm">Filter</button>
       </form>

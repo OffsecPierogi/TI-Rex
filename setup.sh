@@ -32,7 +32,7 @@ warn() { echo -e "  ${YELLOW}[WARN]${NC} $1"; }
 echo ""
 echo -e "${BOLD}======================================================${NC}"
 echo -e "${BOLD}  TI-Rex -- Threat Intelligence Platform Setup${NC}"
-echo -e "${BOLD}  MITRE ATT&CK  |  Atomic Red Team  |  IOCs${NC}"
+echo -e "${BOLD}  MITRE ATT&CK  |  MITRE ATLAS  |  Atomic Red Team  |  IOCs${NC}"
 echo -e "${BOLD}======================================================${NC}"
 
 # ---------------------------------------------------------------------------
@@ -183,7 +183,7 @@ ok "Database schema ready"
 section "Threat intelligence data"
 
 echo ""
-echo "  The next step clones MITRE ATT&CK and Atomic Red Team repos,"
+echo "  The next step clones MITRE ATT&CK, downloads MITRE ATLAS, and clones Atomic Red Team repos,"
 echo "  then parses and ingests all threat intel data into the database."
 echo "  This takes 2-5 minutes and requires an internet connection."
 echo ""
